@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Call Schedule Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #FFD1DC 0%, #C7CEEA 50%, #B5EAD7 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: 2px solid #C7CEEA;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            min-width: 200px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #D4A5D4;
+        }
+
+        .sync-button {
+            padding: 12px 24px;
+            background: #B5EAD7;
+            color: #2C5F5D;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .sync-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(181, 234, 215, 0.5);
+            background: #A0DFC4;
+        }
+
+        .sync-button:active {
+            transform: translateY(0);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            background: #C7CEEA;
+            color: #4A5283;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(199, 206, 234, 0.5);
+            background: #B5BCD9;
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .current-month {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #333;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .calendar-container {
+            margin-top: 30px;
+        }
+
+        .month-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .month-header {
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #C7CEEA;
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .calendar-table th {
+            padding: 15px 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .calendar-table td {
+            padding: 15px 10px;
+            text-align: center;
+            vertical-align: top;
+            border: 1px solid #e0e0e0;
+            height: 100px;
+            position: relative;
+        }
+
+        .calendar-table td.empty {
+            background: #fafafa;
+        }
+
+        .calendar-table td.weekend {
+            background: #E8F4F8;
+        }
+
+        .calendar-table td.today {
+            background: #fff3cd;
+            font-weight: bold;
+        }
+
+        .day-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .on-call-person {
+            font-size: 13px;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin-top: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-box {
+            width: 40px;
+            height: 25px;
+            border-radius: 6px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>On-Call Schedule Calendar</h1>
+            <p style="color: #666; margin-top: 10px;">View and manage on-call schedules</p>
+        </header>
+
+        <div class="controls">
+            <div class="filter-section">
+                <label for="personFilter">Filter by Person:</label>
+                <select id="personFilter">
+                    <option value="all">All People</option>
+                </select>
+            </div>
+            <button class="sync-button" onclick="syncToOutlook()">
+                Sync to Outlook Calendar (All Months)
+            </button>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-button" onclick="previousMonth()">Previous Month</button>
+            <div class="current-month" id="currentMonthDisplay"></div>
+            <button class="nav-button" onclick="nextMonth()">Next Month</button>
+        </div>
+
+        <div id="calendar-container" class="calendar-container">
+            <!-- Calendar will be rendered here -->
+        </div>
+
+        <div class="legend">
+            <h3>People & Colors</h3>
+            <div class="legend-items" id="legend-items">
+                <!-- Legend items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scheduleData = [];
+        let allPeople = new Set();
+        let currentMonthOffset = 0;
+        let personColors = {};
+
+        // Color palette for different people
+        const colorPalette = [
+            '#FF6B6B', // Red
+            '#4ECDC4', // Teal
+            '#45B7D1', // Blue
+            '#FFA07A', // Light Salmon
+            '#98D8C8', // Mint
+            '#F7DC6F', // Yellow
+            '#BB8FCE', // Purple
+            '#85C1E2', // Sky Blue
+            '#F8B739', // Orange
+            '#52B788'  // Green
+        ];
+
+        // Load CSV file
+        async function loadCSV() {
+            try {
+                const response = await fetch('oncall-schedule.csv');
+                const csvText = await response.text();
+                parseCSV(csvText);
+                assignColors();
+                populatePersonFilter();
+                populateLegend();
+                renderCalendar();
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                document.getElementById('calendar-container').innerHTML =
+                    '<div class="no-data">Error loading schedule data. Please ensure oncall-schedule.csv is in the same directory.</div>';
+            }
+        }
+
+        // Parse CSV data
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                const entry = {
+                    name: values[0].trim(),
+                    email: values[1].trim(),
+                    date: values[2].trim()
+                };
+                scheduleData.push(entry);
+                allPeople.add(entry.name);
+            }
+        }
+
+        // Assign colors to each person
+        function assignColors() {
+            const sortedPeople = Array.from(allPeople).sort();
+            sortedPeople.forEach((person, index) => {
+                personColors[person] = colorPalette[index % colorPalette.length];
+            });
+        }
+
+        // Populate legend with all people and their colors
+        function populateLegend() {
+            const legendItems = document.getElementById('legend-items');
+            const sortedPeople = Array.from(allPeople).sort();
+
+            sortedPeople.forEach(person => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.background = personColors[person];
+
+                const label = document.createElement('span');
+                label.textContent = person;
+
+                item.appendChild(colorBox);
+                item.appendChild(label);
+                legendItems.appendChild(item);
+            });
+        }
+
+        // Populate person filter dropdown
+        function populatePersonFilter() {
+            const select = document.getElementById('personFilter');
+            const sortedPeople = Array.from(allPeople).sort();
+
+            sortedPeople.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person;
+                option.textContent = person;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', renderCalendar);
+        }
+
+        // Get filtered data based on selected person
+        function getFilteredData() {
+            const selectedPerson = document.getElementById('personFilter').value;
+            if (selectedPerson === 'all') {
+                return scheduleData;
+            }
+            return scheduleData.filter(entry => entry.name === selectedPerson);
+        }
+
+        // Navigate to previous month
+        function previousMonth() {
+            currentMonthOffset--;
+            renderCalendar();
+        }
+
+        // Navigate to next month
+        function nextMonth() {
+            currentMonthOffset++;
+            renderCalendar();
+        }
+
+        // Render calendar for current month
+        function renderCalendar() {
+            const calendarContainer = document.getElementById('calendar-container');
+            calendarContainer.innerHTML = '';
+
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+
+            // Calculate the month to display
+            const monthDate = new Date(currentYear, currentMonth + currentMonthOffset, 1);
+
+            // Update the current month display
+            document.getElementById('currentMonthDisplay').textContent =
+                monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            // Render the month
+            const monthContainer = createMonthCalendar(monthDate);
+            calendarContainer.appendChild(monthContainer);
+        }
+
+        // Create calendar for a single month
+        function createMonthCalendar(date) {
+            const container = document.createElement('div');
+            container.className = 'month-container';
+
+            const monthHeader = document.createElement('div');
+            monthHeader.className = 'month-header';
+            monthHeader.textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            container.appendChild(monthHeader);
+
+            const table = document.createElement('table');
+            table.className = 'calendar-table';
+
+            // Create header row
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Create calendar body
+            const tbody = document.createElement('tbody');
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+            const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+            let dayCounter = 1;
+            const today = new Date();
+
+            for (let week = 0; week < 6; week++) {
+                const row = document.createElement('tr');
+
+                for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                    const cell = document.createElement('td');
+
+                    if ((week === 0 && dayOfWeek < firstDay) || dayCounter > daysInMonth) {
+                        cell.className = 'empty';
+                    } else {
+                        const currentDate = new Date(date.getFullYear(), date.getMonth(), dayCounter);
+                        const dateStr = currentDate.toISOString().split('T')[0];
+
+                        // Check if it's a weekend (Saturday or Sunday)
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            cell.className = 'weekend';
+                        }
+
+                        // Check if it's today (overrides weekend class)
+                        if (currentDate.toDateString() === today.toDateString()) {
+                            cell.className = 'today';
+                        }
+
+                        const dayNum = document.createElement('div');
+                        dayNum.className = 'day-number';
+                        dayNum.textContent = dayCounter;
+                        cell.appendChild(dayNum);
+
+                        // Check if someone is on-call this day
+                        const filteredData = getFilteredData();
+                        const onCallEntry = filteredData.find(entry => entry.date === dateStr);
+
+                        if (onCallEntry) {
+                            const personDiv = document.createElement('div');
+                            personDiv.className = 'on-call-person';
+                            personDiv.textContent = onCallEntry.name;
+                            personDiv.title = `${onCallEntry.name} (${onCallEntry.email})`;
+                            personDiv.style.background = personColors[onCallEntry.name];
+                            cell.appendChild(personDiv);
+                        }
+
+                        dayCounter++;
+                    }
+
+                    row.appendChild(cell);
+                }
+
+                tbody.appendChild(row);
+                if (dayCounter > daysInMonth) break;
+            }
+
+            table.appendChild(tbody);
+            container.appendChild(table);
+
+            return container;
+        }
+
+        // Generate ICS file and download
+        function syncToOutlook() {
+            const filteredData = getFilteredData();
+
+            if (filteredData.length === 0) {
+                alert('No schedule data to sync.');
+                return;
+            }
+
+            let icsContent = 'BEGIN:VCALENDAR\n';
+            icsContent += 'VERSION:2.0\n';
+            icsContent += 'PRODID:-//On-Call Schedule//EN\n';
+            icsContent += 'CALSCALE:GREGORIAN\n';
+            icsContent += 'METHOD:PUBLISH\n';
+
+            filteredData.forEach(entry => {
+                const eventDate = new Date(entry.date + 'T00:00:00');
+                const dateStr = eventDate.toISOString().replace(/[-:]/g, '').split('T')[0];
+                const nextDay = new Date(eventDate);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const nextDayStr = nextDay.toISOString().replace(/[-:]/g, '').split('T')[0];
+
+                icsContent += 'BEGIN:VEVENT\n';
+                icsContent += `UID:oncall-${entry.date}-${entry.email}\n`;
+                icsContent += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+                icsContent += `DTSTART;VALUE=DATE:${dateStr}\n`;
+                icsContent += `DTEND;VALUE=DATE:${nextDayStr}\n`;
+                icsContent += `SUMMARY:On-Call: ${entry.name}\n`;
+                icsContent += `DESCRIPTION:On-call duty for ${entry.name} (${entry.email})\n`;
+                icsContent += `ORGANIZER;CN=${entry.name}:mailto:${entry.email}\n`;
+                icsContent += 'STATUS:CONFIRMED\n';
+                icsContent += 'TRANSP:TRANSPARENT\n';
+                icsContent += 'END:VEVENT\n';
+            });
+
+            icsContent += 'END:VCALENDAR';
+
+            // Create download link
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'oncall-schedule.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert('Calendar file downloaded! Open the .ics file to import into Outlook.');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', loadCSV);
+    </script>
+</body>
+</html>
