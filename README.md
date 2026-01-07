@@ -14,17 +14,18 @@ A web-based calendar application to view and manage on-call schedules with Outlo
 - Weekend dates (Saturday & Sunday) highlighted with pastel blue background
 - Color-coded legend for easy identification
 - Soft pastel color scheme for comfortable viewing
+- Self-contained single HTML file - perfect for GitHub Pages deployment
 
 ## Files
 
-- `index.html` - Main calendar web page
-- `oncall-schedule.csv` - On-call schedule data (name, email, date)
+- `index.html` - Main calendar web page (contains embedded schedule data)
+- `oncall-schedule.csv` - Reference CSV file (for manual editing before embedding)
 
 ## How to Use
 
 1. **Open the Calendar**
    - Simply open `index.html` in any modern web browser
-   - The calendar will automatically load data from `oncall-schedule.csv`
+   - The calendar will automatically load from embedded data
    - Current month is displayed by default
 
 2. **Navigate Between Months**
@@ -41,22 +42,35 @@ A web-based calendar application to view and manage on-call schedules with Outlo
    - The sync respects the person filter (if you filtered by Alice, only Alice's events will be synced)
    - Open the file to import events into Outlook or any calendar app
 
-## CSV Format
+## Deploy to GitHub Pages
 
-The `oncall-schedule.csv` file should have three columns:
-```
-name,email,date
-Alice Johnson,alice.johnson@example.com,2026-01-06
-Bob Smith,bob.smith@example.com,2026-01-07
-```
+1. Upload `index.html` to your GitHub repository
+2. Go to repository Settings → Pages
+3. Select the branch and folder where `index.html` is located
+4. Save and wait for deployment
+5. Access your calendar at `https://yourusername.github.io/repository-name/`
+
+## Updating Schedule Data
+
+The schedule data is embedded directly in the `index.html` file. To update it:
+
+1. Edit the `oncall-schedule.csv` file with your schedule data:
+   ```
+   name,email,date
+   Alice Johnson,alice.johnson@example.com,2026-01-06
+   Bob Smith,bob.smith@example.com,2026-01-07
+   ```
+
+2. Open `index.html` in a text editor
+3. Find the `const csvData = \`...\`` section (around line 298)
+4. Replace the embedded data with your CSV content
+5. Save and upload to GitHub Pages
+
+### CSV Format
 
 - **name**: Person's full name
 - **email**: Person's email address
 - **date**: Date in YYYY-MM-DD format
-
-## Customization
-
-To add or modify schedules, edit the `oncall-schedule.csv` file and refresh the page.
 
 ## Browser Compatibility
 

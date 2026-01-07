@@ -295,6 +295,99 @@
         let currentMonthOffset = 0;
         let personColors = {};
 
+        // Embedded CSV data
+        const csvData = `name,email,date
+Alice Johnson,alice.johnson@example.com,2026-01-06
+Bob Smith,bob.smith@example.com,2026-01-07
+Charlie Davis,charlie.davis@example.com,2026-01-08
+Diana Prince,diana.prince@example.com,2026-01-09
+Eve Martinez,eve.martinez@example.com,2026-01-10
+Frank Wilson,frank.wilson@example.com,2026-01-11
+Alice Johnson,alice.johnson@example.com,2026-01-12
+Bob Smith,bob.smith@example.com,2026-01-13
+Charlie Davis,charlie.davis@example.com,2026-01-14
+Diana Prince,diana.prince@example.com,2026-01-15
+Eve Martinez,eve.martinez@example.com,2026-01-16
+Frank Wilson,frank.wilson@example.com,2026-01-17
+Alice Johnson,alice.johnson@example.com,2026-01-18
+Bob Smith,bob.smith@example.com,2026-01-19
+Charlie Davis,charlie.davis@example.com,2026-01-20
+Diana Prince,diana.prince@example.com,2026-01-21
+Eve Martinez,eve.martinez@example.com,2026-01-22
+Frank Wilson,frank.wilson@example.com,2026-01-23
+Alice Johnson,alice.johnson@example.com,2026-01-24
+Bob Smith,bob.smith@example.com,2026-01-25
+Charlie Davis,charlie.davis@example.com,2026-01-26
+Diana Prince,diana.prince@example.com,2026-01-27
+Eve Martinez,eve.martinez@example.com,2026-01-28
+Frank Wilson,frank.wilson@example.com,2026-01-29
+Alice Johnson,alice.johnson@example.com,2026-01-30
+Bob Smith,bob.smith@example.com,2026-01-31
+Charlie Davis,charlie.davis@example.com,2026-02-01
+Diana Prince,diana.prince@example.com,2026-02-02
+Eve Martinez,eve.martinez@example.com,2026-02-03
+Frank Wilson,frank.wilson@example.com,2026-02-04
+Alice Johnson,alice.johnson@example.com,2026-02-05
+Bob Smith,bob.smith@example.com,2026-02-06
+Charlie Davis,charlie.davis@example.com,2026-02-07
+Diana Prince,diana.prince@example.com,2026-02-08
+Eve Martinez,eve.martinez@example.com,2026-02-09
+Frank Wilson,frank.wilson@example.com,2026-02-10
+Alice Johnson,alice.johnson@example.com,2026-02-11
+Bob Smith,bob.smith@example.com,2026-02-12
+Charlie Davis,charlie.davis@example.com,2026-02-13
+Diana Prince,diana.prince@example.com,2026-02-14
+Eve Martinez,eve.martinez@example.com,2026-02-15
+Frank Wilson,frank.wilson@example.com,2026-02-16
+Alice Johnson,alice.johnson@example.com,2026-02-17
+Bob Smith,bob.smith@example.com,2026-02-18
+Charlie Davis,charlie.davis@example.com,2026-02-19
+Diana Prince,diana.prince@example.com,2026-02-20
+Eve Martinez,eve.martinez@example.com,2026-02-21
+Frank Wilson,frank.wilson@example.com,2026-02-22
+Alice Johnson,alice.johnson@example.com,2026-02-23
+Bob Smith,bob.smith@example.com,2026-02-24
+Charlie Davis,charlie.davis@example.com,2026-02-25
+Diana Prince,diana.prince@example.com,2026-02-26
+Eve Martinez,eve.martinez@example.com,2026-02-27
+Frank Wilson,frank.wilson@example.com,2026-02-28
+Alice Johnson,alice.johnson@example.com,2026-03-01
+Bob Smith,bob.smith@example.com,2026-03-02
+Charlie Davis,charlie.davis@example.com,2026-03-03
+Diana Prince,diana.prince@example.com,2026-03-04
+Eve Martinez,eve.martinez@example.com,2026-03-05
+Frank Wilson,frank.wilson@example.com,2026-03-06
+Alice Johnson,alice.johnson@example.com,2026-03-07
+Bob Smith,bob.smith@example.com,2026-03-08
+Charlie Davis,charlie.davis@example.com,2026-03-09
+Diana Prince,diana.prince@example.com,2026-03-10
+Eve Martinez,eve.martinez@example.com,2026-03-11
+Frank Wilson,frank.wilson@example.com,2026-03-12
+Alice Johnson,alice.johnson@example.com,2026-03-13
+Bob Smith,bob.smith@example.com,2026-03-14
+Charlie Davis,charlie.davis@example.com,2026-03-15
+Diana Prince,diana.prince@example.com,2026-03-16
+Eve Martinez,eve.martinez@example.com,2026-03-17
+Frank Wilson,frank.wilson@example.com,2026-03-18
+Alice Johnson,alice.johnson@example.com,2026-03-19
+Bob Smith,bob.smith@example.com,2026-03-20
+Charlie Davis,charlie.davis@example.com,2026-03-21
+Diana Prince,diana.prince@example.com,2026-03-22
+Eve Martinez,eve.martinez@example.com,2026-03-23
+Frank Wilson,frank.wilson@example.com,2026-03-24
+Alice Johnson,alice.johnson@example.com,2026-03-25
+Bob Smith,bob.smith@example.com,2026-03-26
+Charlie Davis,charlie.davis@example.com,2026-03-27
+Diana Prince,diana.prince@example.com,2026-03-28
+Eve Martinez,eve.martinez@example.com,2026-03-29
+Frank Wilson,frank.wilson@example.com,2026-03-30
+Alice Johnson,alice.johnson@example.com,2026-03-31
+Bob Smith,bob.smith@example.com,2026-04-01
+Charlie Davis,charlie.davis@example.com,2026-04-02
+Diana Prince,diana.prince@example.com,2026-04-03
+Eve Martinez,eve.martinez@example.com,2026-04-04
+Frank Wilson,frank.wilson@example.com,2026-04-05`;
+
         // Color palette for different people
         const colorPalette = [
             '#FF6B6B', // Red
@@ -309,12 +402,10 @@
             '#52B788'  // Green
         ];
 
-        // Load CSV file
-        async function loadCSV() {
+        // Load CSV data
+        function loadCSV() {
             try {
-                const response = await fetch('oncall-schedule.csv');
-                const csvText = await response.text();
-                parseCSV(csvText);
+                parseCSV(csvData);
                 assignColors();
                 populatePersonFilter();
                 populateLegend();
@@ -322,7 +413,7 @@
             } catch (error) {
                 console.error('Error loading CSV:', error);
                 document.getElementById('calendar-container').innerHTML =
-                    '<div class="no-data">Error loading schedule data. Please ensure oncall-schedule.csv is in the same directory.</div>';
+                    '<div class="no-data">Error loading schedule data.</div>';
             }
         }
 
