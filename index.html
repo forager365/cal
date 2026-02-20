@@ -81,6 +81,7 @@
 
         .ctrl-divider { width: 1px; height: 28px; background: #edebe9; flex-shrink: 0; }
 
+        /* OUTLOOK SYNC — commented out
         .sync-count {
             font-size: 0.75rem;
             color: #605e5c;
@@ -107,6 +108,7 @@
         .sync-btn:hover { background: #106ebe; }
         .sync-btn:active { background: #005a9e; }
         .sync-btn svg { flex-shrink: 0; }
+        END OUTLOOK SYNC */
 
         /* ── Notes panel ── */
         .notes-panel {
@@ -353,6 +355,7 @@
                 <option value="">&#8212; All &#8212;</option>
             </select>
         </div>
+        <!-- OUTLOOK SYNC — commented out
         <span class="sync-count" id="sync-count"></span>
         <button class="sync-btn" onclick="syncToOutlook()">
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -362,6 +365,7 @@
             </svg>
             Sync to Outlook
         </button>
+        END OUTLOOK SYNC -->
     </div>
 
     <!-- Notes panel -->
@@ -395,9 +399,9 @@
     <!-- Legend (visible only when filter active) -->
     <div class="legend" id="legend">
         <strong>Legend:</strong>
-        <div class="leg-item"><div class="leg-swatch" style="background:#dff6dd"></div>On-Call match</div>
-        <div class="leg-item"><div class="leg-swatch" style="background:#fff4ce"></div>Backup match</div>
-        <div class="leg-item"><div class="leg-swatch" style="background:#deecf9"></div>Both roles match</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#dff6dd"></div>On-Call</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#fff4ce"></div>Backup</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#deecf9"></div>Both roles</div>
         <div class="leg-item">&#128203; Has notes</div>
     </div>
 
@@ -491,16 +495,18 @@
 
     function onFilterChange() {
         render();
-        updateSyncCount();
+        // updateSyncCount(); // OUTLOOK SYNC — commented out
         updateLegend();
     }
 
+    /* OUTLOOK SYNC — commented out
     function updateSyncCount() {
         const count = filteredEntries().length;
         const fo = filterOncall(), fb = filterBackup();
         document.getElementById('sync-count').textContent =
             (fo || fb) ? `${count} day${count !== 1 ? 's' : ''} selected` : `${count} total days`;
     }
+    END OUTLOOK SYNC */
 
     function updateLegend() {
         const el = document.getElementById('legend');
@@ -657,6 +663,7 @@
         return `${y}-${pad2(m)}-${pad2(d)}`;
     }
 
+    /* OUTLOOK SYNC — commented out
     function icsDate(key) { return key.replace(/-/g, ''); }
 
     function icsNextDay(key) {
@@ -742,6 +749,7 @@
         document.body.removeChild(anchor);
         setTimeout(() => URL.revokeObjectURL(url), 1500);
     }
+    END OUTLOOK SYNC */
 
     // ─── Bootstrap ────────────────────────────────────────────────────────────
     async function init() {
@@ -767,7 +775,7 @@
         curYear  = today.getFullYear();
         curMonth = today.getMonth();
 
-        updateSyncCount();
+        // updateSyncCount(); // OUTLOOK SYNC — commented out
         render();
     }
 
